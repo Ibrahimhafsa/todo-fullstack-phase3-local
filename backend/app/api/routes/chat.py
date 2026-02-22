@@ -153,7 +153,7 @@ def send_chat_message(
             message_id=assistant_msg.id,
             conversation_id=conversation.id,
             role="assistant",
-            content=agent_response,
+            content=assistant_msg.content,
             timestamp=assistant_msg.created_at,
         )
 

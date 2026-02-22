@@ -58,8 +58,8 @@ def get_task(user_id: str, task_id: int, session: Session) -> Optional[Dict[str,
 def create_task(
     user_id: str,
     title: str,
-    description: Optional[str],
     session: Session,
+    description: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Create new task.
@@ -83,9 +83,9 @@ def create_task(
 def update_task(
     user_id: str,
     task_id: int,
-    title: Optional[str],
-    description: Optional[str],
     session: Session,
+    title: Optional[str] = None,
+    description: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
     """
     Update task.

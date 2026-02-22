@@ -437,11 +437,12 @@ Be concise and helpful."""
                         ],
                     })
 
-                    # Add tool results
+                    # Add tool results as proper tool messages
                     for tool_result in tool_results:
                         messages.append({
-                            "role": "user",
-                            "content": tool_result,
+                            "role": "tool",
+                            "tool_call_id": tool_result["tool_call_id"],
+                            "content": tool_result["content"],
                         })
 
                     # Call OpenAI again with results
@@ -482,7 +483,7 @@ Be concise and helpful."""
         tool_calls: list[Any],
         mcp_registry: "MCPToolRegistry",
         user_id: str,
-    ) -> list[str]:
+    ) -> list[Dict[str, Any]]:
         """
         Execute tool calls and return results.
 
@@ -492,7 +493,7 @@ Be concise and helpful."""
             user_id: User ID for tool parameter
 
         Returns:
-            List of tool result strings (JSON format)
+            List of tool result dicts with tool_call_id and content
         """
         results = []
 
@@ -508,15 +509,17 @@ Be concise and helpful."""
                 tool_name = tool_call.function.name
                 tool_result = mcp_registry.call_tool(tool_name, **tool_args)
 
-                # Format result
-                result_json = json.dumps({
+                # Format result for OpenAI tool message
+                result_dict = {
                     "tool_call_id": tool_call.id,
-                    "tool_name": tool_name,
-                    "result": tool_result,
-                    "success": True,
-                })
+                    "content": json.dumps({
+                        "tool_name": tool_name,
+                        "result": tool_result,
+                        "success": True,
+                    }),
+                }
 
-                results.append(result_json)
+                results.append(result_dict)
 
                 logger.debug(
                     f"Tool executed: user={user_id}, tool={tool_name}, result_keys={list(tool_result.keys()) if isinstance(tool_result, dict) else 'N/A'}"
@@ -524,24 +527,28 @@ Be concise and helpful."""
 
             except json.JSONDecodeError as e:
                 # Failed to parse arguments
-                result_json = json.dumps({
+                result_dict = {
                     "tool_call_id": tool_call.id,
-                    "tool_name": tool_call.function.name,
-                    "error": f"Invalid arguments: {str(e)}",
-                    "success": False,
-                })
-                results.append(result_json)
+                    "content": json.dumps({
+                        "tool_name": tool_call.function.name,
+                        "error": f"Invalid arguments: {str(e)}",
+                        "success": False,
+                    }),
+                }
+                results.append(result_dict)
                 logger.error(f"Failed to parse tool arguments: {str(e)}")
 
             except Exception as e:
                 # Tool execution failed
-                result_json = json.dumps({
+                result_dict = {
                     "tool_call_id": tool_call.id,
-                    "tool_name": tool_call.function.name,
-                    "error": str(e),
-                    "success": False,
-                })
-                results.append(result_json)
+                    "content": json.dumps({
+                        "tool_name": tool_call.function.name,
+                        "error": str(e),
+                        "success": False,
+                    }),
+                }
+                results.append(result_dict)
                 logger.error(f"Tool execution error: {str(e)}")
 
         return results
