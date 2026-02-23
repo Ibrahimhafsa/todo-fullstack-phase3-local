@@ -14,11 +14,13 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
-    # Import models to ensure they're registered with SQLModel
-    from app.models.task import Task  # noqa: F401
-    from app.models.conversation import Conversation, Message  # noqa: F401 (Spec-4)
-    init_db()
+    """Safe startup for HF Spaces (skip DB errors)."""
+    try:
+        from app.models.task import Task  # noqa
+        from app.models.conversation import Conversation, Message  # noqa
+        init_db()
+    except Exception as e:
+        print("Database initialization skipped:", e)
     yield
 
 
