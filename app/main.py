@@ -8,19 +8,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.tasks import router as tasks_router
 from app.api.auth import router as auth_router
 from app.database import init_db
+from fastapi.responses import HTMLResponse
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Safe startup for HF Spaces (skip DB errors)."""
+    """Safe startup for HF Spaces."""
+    from app.models.task import Task
+    from app.models.conversation import Conversation, Message
+
     try:
-        from app.models.task import Task  # noqa
-        from app.models.conversation import Conversation, Message  # noqa
         init_db()
+        print("Database initialized ✅")
     except Exception as e:
-        print("Database initialization skipped:", e)
+        print("Database init skipped ❌:", e)
+
     yield
 
 
@@ -33,15 +37,28 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],   # 🔥 IMPORTANT FOR HF SPACES
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/")
+from fastapi.responses import HTMLResponse
+
+@app.get("/", response_class=HTMLResponse)
 def root():
-    return {"status": "Backend is running 🚀"}
+    return """
+    <html>
+        <head>
+            <title>Todo Backend Phase 3</title>
+        </head>
+        <body>
+            <h1>🚀 Backend is LIVE on Hugging Face!</h1>
+            <p>If you see this, deployment is successful ✅</p>
+            <a href="/docs">Open API Docs</a>
+        </body>
+    </html>
+    """
 
 @app.get("/health")
 def health_check():
