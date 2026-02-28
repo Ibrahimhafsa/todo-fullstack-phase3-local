@@ -5,7 +5,7 @@
 
 import { Task, TaskCreate, TaskListResponse, TaskUpdate } from "./types/task";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://todo-backend-phase3-ec30.onrender.com";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -31,7 +31,7 @@ export async function apiClient<T = unknown>(
     (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API}${endpoint}`, {
     ...options,
     headers,
   });

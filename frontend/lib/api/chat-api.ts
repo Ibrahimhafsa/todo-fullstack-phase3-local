@@ -7,7 +7,9 @@
 
 import { ChatRequest, ChatResponse, ChatError } from "@/lib/types/chat";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://todo-backend-phase3-ec30.onrender.com";
 
 /**
  * Send a chat message to the backend agent
@@ -24,10 +26,10 @@ export async function sendChatMessage(
   token: string
 ): Promise<ChatResponse> {
   try {
-    console.log("[sendChatMessage] Sending to:", `${API_URL}/api/${userId}/chat`);
+    console.log("[sendChatMessage] Sending to:", `${API}/api/${userId}/chat`);
     console.log("[sendChatMessage] Request:", request);
 
-    const response = await fetch(`${API_URL}/api/${userId}/chat`, {
+    const response = await fetch(`${API}/api/${userId}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

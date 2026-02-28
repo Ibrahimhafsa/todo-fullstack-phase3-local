@@ -1,4 +1,6 @@
-const API = "http://localhost:8000";
+const API =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://todo-backend-phase3-ec30.onrender.com";
 
 export const signUp = async (email: string, password: string) => {
   try {
